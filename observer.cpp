@@ -4,7 +4,4 @@ Observer::Observer()
 {
 }
 
-virtual void Observer::update()
-{
 
-}

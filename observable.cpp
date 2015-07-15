@@ -1,4 +1,5 @@
 #include "observable.h"
+#include "observer.h"
 #include <iterator>
 using namespace std;
 Observable::Observable()
@@ -13,11 +14,19 @@ void Observable::attachObserver(Observer * observer)
 
 void Observable::detachObserver(Observer * observer)
 {
-    observers.erase(observer);
+    for (vector<Observer*>::iterator i = observers.begin(); i != observers.end(); ++i)
+        if ((*i) == observer)
+            observers.erase(i);
 }
 
 void Observable::notifyObservers()
 {
     for (vector<Observer*>::iterator i = observers.begin(); i != observers.end(); ++i)
-        *i->update();
+        (*i)->update();
+}
+
+void Observable::notifyObservers(QString message)
+{
+    for (vector<Observer*>::iterator i = observers.begin(); i != observers.end(); ++i)
+        (*i)->update(message);
 }

@@ -1,5 +1,8 @@
 #include "BoardView.h"
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QKeyEvent>
+#include <QMessageBox>
 #include <QDebug>
 BoardView::BoardView(QWidget *parent) :
     QWidget(parent)
@@ -10,15 +13,31 @@ BoardView::BoardView(QWidget *parent) :
       */
 
     /**
-      Game
       Board
       */
-    myGame = new Game(this);
-    myBoard = myGame->getBoard();
+    myBoard = new Board();
+    myBoard->attachObserver(this); //! 注册观察者
+
+
+    boardLayout = new QGridLayout;
+    scoreLayout = new QHBoxLayout;
+    mainLayout = new QVBoxLayout;
+
+    resetButton = new QPushButton("reset");
+    resetButton->setFocusPolicy(Qt::NoFocus);
+
+    scoreView = new QLabel("Score:0");
+    scoreView->setStyleSheet("QLabel{font-size:10px; \
+                                     font-weight: bold;}");
 
     //! 设置布局 QGridLayout
-    boardLayout = new QGridLayout;
-    this->setLayout(boardLayout);
+    scoreLayout->addWidget(scoreView);
+    scoreLayout->addWidget(resetButton);
+
+    mainLayout->addLayout(boardLayout);
+    mainLayout->addLayout(scoreLayout);
+
+    this->setLayout(mainLayout);
 
     /**
       初始化棋盘
@@ -29,9 +48,11 @@ BoardView::BoardView(QWidget *parent) :
         boardTiles.push_back(tmpTile);
         boardLayout->addWidget(tmpTile->tile,i/4,i%4,1,1);
     }
+    QObject::connect(this->resetButton,SIGNAL(clicked()),this,SLOT(resetView()));
     /**
+      初始界面
       */
-    updateUI();
+    update();
 }
 
 myTile* BoardView::getMyTile(int row, int col)
@@ -47,22 +68,37 @@ myTile* BoardView::getMyTile(int num)
 void BoardView::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()){
-    case Qt::Key_Left: myGame->move(Board::LEFT); break;
-    case Qt::Key_Right: myGame->move(Board::RIGHT); break;
-    case Qt::Key_Up: myGame->move(Board::UP); break;
-    case Qt::Key_Down: myGame->move(Board::DOWN); break;
+    case Qt::Key_Left: myBoard->move(Board::LEFT); break;
+    case Qt::Key_Right: myBoard->move(Board::RIGHT); break;
+    case Qt::Key_Up: myBoard->move(Board::UP); break;
+    case Qt::Key_Down: myBoard->move(Board::DOWN); break;
+    case Qt::Key_Space: resetView(); break;
 //    default:;
     }
 }
 
-void BoardView::updateUI()
+void BoardView::resetView()
 {
-    qDebug() << myBoard;
+    myBoard->reset();
+}
+
+void BoardView::update()
+{
     for (int i = 0; i < TileNum; i++)
     {
-        qDebug() << myBoard->Tiles[i];
         boardTiles[i]->setMyStyle(myBoard->Tiles[i]);
     }
+    scoreView->setText("Score:"+QString::number(myBoard->getScore()));
+
+}
+
+void BoardView::update(QString message)
+{
+    int ret = QMessageBox::question(this,tr("GAME OVER"),
+                                    tr("your score is %1.\nDo you want to reset?").arg(QString::number(myBoard->getScore())),
+                                    QMessageBox::Yes|QMessageBox::No, QMessageBox::Yes);
+    if (ret == QMessageBox::Yes)
+        resetView();
 }
 
 BoardView::~BoardView()

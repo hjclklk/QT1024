@@ -4,27 +4,37 @@
 #include <iostream>
 #include <QDebug>
 
-Board::Board(BoardView* view):
-    gameView(view)
+Board::Board()
 {
     srand((unsigned)time(NULL));
     init();
-//    test = 2;
 }
 
 void Board::init()
 {
+    score = 0;
     Tiles.resize(TileNum);
     for (int i = 0; i < TileNum; i++)
         Tiles.at(i) = 0;
     generateRandomTileDouble();
-    //gameView->updateUI();
+    notifyObservers();
+}
+void Board::reset()
+{
+    init();
+}
+
+int Board::getScore()
+{
+    return score;
 }
 
 void Board::generateRandomTileDouble()
 {
     generateRandomTile();
     generateRandomTile();
+    score += 4;
+    qDebug() << score;
 }
 
 void Board::generateRandomTile()
@@ -69,7 +79,10 @@ void Board::move(Direction direction)
     }
     if (moveOk) {
         generateRandomTileDouble();
-        gameView->updateUI();
+        notifyObservers();
+    }
+    if (isGameOver()){
+        notifyObservers("GameOver");
     }
 }
 
@@ -155,4 +168,27 @@ bool Board::moveLeft(int row, int col)
         num = tempnum;
     }
     return ok;
+}
+
+bool Board::isGameOver()
+{
+    qDebug("---test---");
+    #define test(value,row,col) \
+        if (((row) >= 0 && (row) < SideLength) && ((col) >= 0 && (col) < SideLength) && (value == Tiles[(row)*4+(col)])) \
+        { \
+            return false; \
+        }
+
+    for (int i = 0; i < SideLength; i++)
+        for (int j = 0; j < SideLength; j++){
+            int value = Tiles[i*4+j];
+            if (value == 0)
+                return false;
+            test(value,(i-1),j);
+            test(value,(i+1),j);
+            test(value,i,j-1);
+            test(value,i,j+1);
+        }
+    qDebug("---end test---");
+    return true;
 }

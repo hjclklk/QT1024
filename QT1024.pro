@@ -16,13 +16,11 @@ SOURCES += main.cpp\
         BoardView.cpp \
     mytile.cpp \
     board.cpp \
-    game.cpp \
     observable.cpp \
     observer.cpp
 
 HEADERS  += BoardView.h \
     mytile.h \
-    game.h \
     board.h \
     observable.h \
     observer.h

@@ -5,10 +5,9 @@
 #include <vector>
 #include "mytile.h"
 #include <QGridLayout>
-#include "game.h"
+#include <QPushButton>
 #include "observer.h"
-
-class Game;
+#include "board.h"
 class Board;
 
 class BoardView : public QWidget,public Observer
@@ -19,15 +18,21 @@ public:
     explicit BoardView(QWidget *parent = 0);
     myTile* getMyTile(int num);
     myTile* getMyTile(int row, int col);
-    void updateUI();
+    void update();
+    void update(QString message);
     ~BoardView();
 protected:
     void keyPressEvent(QKeyEvent *event);
+private slots:
+    void resetView();
 private:
     Board* myBoard;
-    Game* myGame;
     std::vector<myTile *> boardTiles;
+    QLabel* scoreView;
+    QPushButton* resetButton;
     QGridLayout* boardLayout;
+    QHBoxLayout* scoreLayout;
+    QVBoxLayout* mainLayout;
 };
 
 #endif // BOARDVIEW_H

@@ -1,9 +1,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 #include <vector>
-#include "BoardView.h"
-
-class Board
+#include "observable.h"
+class Board: public Observable
 {
     static const int TileNum = 16;
     static const int SideLength = 4;
@@ -11,10 +10,14 @@ public:
     enum Direction{
         UP,DOWN,RIGHT,LEFT
     };
-//    int test;
+    Board();
     friend class BoardView;
-    Board(BoardView* view);
     void move(Direction direction);
+    int getScore();
+
+public slots:
+    void reset();
+
 private:
     bool moveUp(int row, int col);
     bool moveDown(int row, int col);
@@ -22,11 +25,12 @@ private:
     bool moveLeft(int row, int col);
     //! 将棋盘转为初始的样子
     void init();
+    bool isGameOver();
     //! 生成随机的格子
     void generateRandomTile();
     void generateRandomTileDouble();
-    BoardView* gameView;
     std::vector<int> Tiles;
+    int score;
 };
 
 #endif // BOARD_H
